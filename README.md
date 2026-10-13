@@ -11,7 +11,9 @@ brew install dahuaxiya/tap/pelican-bench
 pelican-bench
 ```
 
-Homebrew 会安装 Node.js 和 Python 3.13。启动命令会打开本机网页，默认地址为 http://127.0.0.1:8780。先到设置页添加自己的模型服务地址、API Key，再进入性能评测，选择模型开始测试。
+Homebrew 会安装 Python 3.13，直接启动后端，不依赖 Node.js。启动命令会打开本机网页，默认地址为 http://127.0.0.1:8780。先到设置页添加自己的模型服务地址、API Key，再进入性能评测，选择模型开始测试。
+
+0.2.0 起统一使用 pelican-bench 命令，不占用 pelican 名称。npm 入口仍保留在安装包中，两种渠道共用数据目录和实例锁；请选择一种全局安装方式。
 
 也可以先添加 tap，再安装：
 
@@ -41,4 +43,4 @@ HTTP 接口测速、容量检测和 SVG 评测可直接使用。其他能力按�
 
 这是项目自有 tap，不是 Homebrew 核心仓库。首版在 macOS 验证，Linux 尚未做真机验证；Windows 请使用 WSL2 或 npm 分发方式。
 
-发布包仅含程序和静态资源，不含开发者配置、登录态、题库或历史记录。下载采用固定版本和 SHA-256 校验。本仓库的发布不额外授予开源许可，第三方组件保留原有许可证。
+发布包仅含程序和静态资源，不含开发者配置、登录态、题库或历史记录。下载采用固定版本和 SHA-256 校验。源码与安装包由 [pelican-bench](https://github.com/dahuaxiya/pelican-bench) 仓库维护，沿用该仓库的 MIT 许可证；第三方组件保留原有许可证。

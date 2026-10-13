@@ -1,27 +1,28 @@
 class PelicanBench < Formula
   desc "Benchmark model endpoints locally with a web UI"
-  homepage "https://github.com/dahuaxiya/homebrew-tap"
-  url "https://github.com/dahuaxiya/homebrew-tap/releases/download/v0.1.0/pelican-bench-0.1.0.tgz"
-  sha256 "3f6e7841207a2b05a69ca4138f4d0875478bcdf03982039ffc934c6f7f1c76cb"
-  license :cannot_represent
+  homepage "https://github.com/dahuaxiya/pelican-bench"
+  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.2.0/pelican-bench-0.2.0.tgz"
+  sha256 "c3e42686072a75de87e6a8e56ba038a40b108ebc98e844e6ecaf7fce9622b24a"
+  license "MIT"
 
-  depends_on "node"
   depends_on "python@3.13"
 
-  # The bundle has no npm runtime dependencies. Keep it read-only in the Cellar;
-  # the CLI selects a separate per-user directory for credentials and results.
+  # Brew invokes Python directly; npm keeps its own Node entry point in the same bundle.
+  # Both select the same per-user storage before importing the backend, keeping the Cellar immutable.
   def install
     libexec.install Dir["*"]
-    (bin/"pelican-bench").write_env_script Formula["node"].opt_bin/"node",
-                                          [libexec/"bin/pelican-bench.mjs"],
-                                          PELICAN_BENCH_PYTHON: Formula["python@3.13"].opt_bin/"python3.13"
+    (bin/"pelican-bench").write_env_script Formula["python@3.13"].opt_bin/"python3.13",
+                                          ["-B", "-u", libexec/"bin/pelican.py"],
+                                          PYTHONDONTWRITEBYTECODE: "1", PYTHONUTF8: "1"
   end
 
+  # Optional dependencies and paid requests require a separate user action after installation.
   def caveats
     <<~EOS
       Run pelican-bench to open the local web UI (default port: 8780).
       Configure your own model endpoint and API key in Settings.
       Model requests are sent from your computer; results are stored locally.
+      Homebrew uses Python directly; Node.js is only needed for npm installations.
 
       IQ datasets: pelican-bench setup-iq bbeh  (or arc)
       Engineering: install Docker, then run pelican-bench setup-engineering.

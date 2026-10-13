@@ -1,0 +1,35 @@
+name: Build and test bottles
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test this revision
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+          HOMEBREW_NO_INSTALL_CLEANUP: '1'
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
+          HOMEBREW_NO_ASK: '1'
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          fi
+          # Clone the checked-out revision, so a concurrent release cannot change the formula under test.
+          brew tap dahuaxiya/tap "$GITHUB_WORKSPACE"
+          brew install --build-bottle dahuaxiya/tap/pelican-bench
+          brew test dahuaxiya/tap/pelican-bench
+          brew bottle --json --no-rebuild --root-url=https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.2.0 dahuaxiya/tap/pelican-bench
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bottle-${{ matrix.os }}
+          path: '*.bottle.*'
+          if-no-files-found: error
