@@ -5,6 +5,12 @@ class PelicanBench < Formula
   sha256 "ca5f2fdc4fa5cd44d351d8cdb43ffb6c7131c03d7078c8115a0db08b157753b1"
   license "MIT"
 
+  bottle do
+    root_url "https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.4.0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1bc035f208ad77d881a89eb316817888e69c1a0f33333c837c8e5e68203bb360"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "bae2074e6439535d1b71be7fca19e62eddc28c1cb318537cefeb64d38a842f2f"
+  end
+
   depends_on "python@3.13"
 
   # Brew invokes Python directly; npm keeps its own Node entry point in the same bundle.

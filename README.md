@@ -28,7 +28,12 @@ brew install pelican-bench
 pelican-bench doctor
 pelican-bench --no-browser
 pelican-bench --port 9000
+pelican-bench start -d --no-browser
+pelican-bench status
+pelican-bench test performance --site my-api --model gpt-6.1-sol
+brew update
 brew upgrade pelican-bench
+pelican-bench restart -d --no-browser
 ```
 
 同一数据目录只运行一个后端。重复启动会打开已有实例。端口被其他服务占用时会报错，不会终止其他服务。
@@ -41,6 +46,6 @@ HTTP 接口测速、容量检测和 SVG 评测可直接使用。其他能力按�
 - ChatGPT / Kimi 账号渠道：安装对应官方 CLI，在页面中登录自己的账号。
 - 工程测评：准备 Docker，执行 pelican-bench setup-engineering。按需使用 PELICAN_BENCH_DOCKER_CONTEXT 指定 Docker context。
 
-这是项目自有 tap，不是 Homebrew 核心仓库。0.2.0 已通过 macOS Apple Silicon 和 Linux x86_64 CI 的安装、启动及实例复用测试，并提供对应预编译包。Intel Mac、Linux ARM 和原生 Windows 尚未验证；Windows 请使用 WSL2。
+这是项目自有 tap，不是 Homebrew 核心仓库。0.4.0 已通过 macOS Apple Silicon 和 Linux x86_64 CI 的安装、启动、停止及实例复用测试，并提供对应预编译包。Intel Mac、Linux ARM 和原生 Windows 尚未验证；Windows 请使用 WSL2。
 
 发布包仅含程序和静态资源，不含开发者配置、登录态、题库或历史记录。下载采用固定版本和 SHA-256 校验。源码与安装包由 [pelican-bench](https://github.com/dahuaxiya/pelican-bench) 仓库维护，沿用该仓库的 MIT 许可证；第三方组件保留原有许可证。
