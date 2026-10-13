@@ -27,7 +27,7 @@ jobs:
           brew tap dahuaxiya/tap "$GITHUB_WORKSPACE"
           brew install --build-bottle dahuaxiya/tap/pelican-bench
           brew test dahuaxiya/tap/pelican-bench
-          brew bottle --json --no-rebuild --root-url=https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.2.0 dahuaxiya/tap/pelican-bench
+          brew bottle --json --no-rebuild --root-url=https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.3.0 dahuaxiya/tap/pelican-bench
       - uses: actions/upload-artifact@v4
         with:
           name: bottle-${{ matrix.os }}

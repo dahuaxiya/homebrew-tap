@@ -1,15 +1,9 @@
 class PelicanBench < Formula
-  desc "Benchmark model endpoints locally with a web UI"
+  desc "Benchmark model endpoints locally with a web UI and CLI"
   homepage "https://github.com/dahuaxiya/pelican-bench"
-  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.2.0/pelican-bench-0.2.0.tgz"
-  sha256 "c3e42686072a75de87e6a8e56ba038a40b108ebc98e844e6ecaf7fce9622b24a"
+  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.3.0/pelican-bench-0.3.0.tgz"
+  sha256 "70ae6e34b23aa7775561bc58882b237a53e08acf58bd4bcc9fe39035f1adadf0"
   license "MIT"
-
-  bottle do
-    root_url "https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.2.0"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3546f78a0ed756f8223187031fcb4572ac3c8020798b07717c4529c0a8c13bc5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "d5035129744bec2beef81f0ff5fd58a74b6f194a39550afda52370bbe474323b"
-  end
 
   depends_on "python@3.13"
 
@@ -29,6 +23,9 @@ class PelicanBench < Formula
       Configure your own model endpoint and API key in Settings.
       Model requests are sent from your computer; results are stored locally.
       Homebrew uses Python directly; Node.js is only needed for npm installations.
+      Background: pelican-bench start -d --no-browser
+      Manage: pelican-bench status | stop | restart | logs
+      CLI benchmarks: pelican-bench test performance --help
 
       IQ datasets: pelican-bench setup-iq bbeh  (or arc)
       Engineering: install Docker, then run pelican-bench setup-engineering.
@@ -74,6 +71,12 @@ class PelicanBench < Formula
       assert_match "<html", http.get("/").body
       assert_equal "200", http.get("/static/capacity.js").code
       assert_match "Already running:", shell_output("#{bin}/pelican-bench --no-browser --data-dir #{data}")
+      assert_match "--target", shell_output("#{bin}/pelican-bench test performance --help")
+      status = JSON.parse(shell_output("#{bin}/pelican-bench status --json --data-dir #{data}"))
+      assert_equal "running", status.fetch("state")
+      # Validate the authenticated CLI stop path before the fallback process cleanup below.
+      stopped = JSON.parse(shell_output("#{bin}/pelican-bench stop --json --data-dir #{data}"))
+      assert_equal "stopped", stopped.fetch("state")
     rescue StandardError
       warn (testpath/"server.log").read
       raise
