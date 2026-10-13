@@ -32,6 +32,8 @@ class PelicanBench < Formula
 
   test do
     require "json"
+    require "net/http"
+    require "timeout"
 
     assert_equal version.to_s, shell_output("#{bin}/pelican-bench --version").strip
     data = testpath/"bench-data"
@@ -39,28 +41,43 @@ class PelicanBench < Formula
     assert_match "3.13.", info.fetch("python")
     assert_equal (testpath.realpath/"bench-data").to_s, info.fetch("data_directory")
     refute_predicate data, :exist?
+    refute_predicate bin/"pelican", :exist?
 
-    # Only loopback health/static requests: never use personal accounts or paid models.
-    port = free_port
-    pid = fork do
-      exec bin/"pelican-bench", "--data-dir", data.to_s, "--port", port.to_s, "--no-browser",
-           [:out, :err] => testpath/"server.log"
-    end
+    # Spawn accepts string redirection paths, not Pathname. Port 0 avoids a free-port race.
+    pid = spawn((bin/"pelican-bench").to_s, "--data-dir", data.to_s, "--port", "0", "--no-browser",
+                out: (testpath/"server.log").to_s, err: [:child, :out])
     begin
-      response = nil
-      40.times do
-        sleep 0.25
-        response = Utils.safe_popen_read("curl", "--silent", "--fail", "--max-time", "1",
-                                        "http://127.0.0.1:#{port}/api/runtime")
-        break if response.include?("pelican-bench")
-      rescue ErrorDuringExecution
-        # Python may still be importing modules when the first request arrives.
-        next
+      state = nil
+      http = nil
+      Timeout.timeout(60) do
+        loop do
+          begin
+            state = JSON.parse((data/"runtime.json").read)
+            # Disable proxies explicitly: these checks must only contact this test's local child.
+            http = Net::HTTP.new("127.0.0.1", state.fetch("port"), nil)
+            http.open_timeout = 2
+            http.read_timeout = 2
+            runtime = JSON.parse(http.get("/api/runtime").body)
+            break if runtime["instance"] == state["instance"]
+          rescue Errno::ENOENT, Errno::ECONNREFUSED, JSON::ParserError, KeyError
+            # Lock creation, readiness metadata and HTTP serving have a normal startup window.
+          end
+          sleep 0.1
+        end
       end
-      assert_equal "pelican-bench", JSON.parse(response).fetch("application")
-      assert_match "<html", shell_output("curl --silent --fail http://127.0.0.1:#{port}/")
+      assert_match "<html", http.get("/").body
+      assert_equal "200", http.get("/static/capacity.js").code
+      assert_match "Already running:", shell_output("#{bin}/pelican-bench --no-browser --data-dir #{data}")
+    rescue StandardError
+      warn (testpath/"server.log").read
+      raise
     ensure
-      Process.kill("TERM", pid)
+      # Reap only the process owned by this test, including failed startup and assertion paths.
+      begin
+        Process.kill("TERM", pid)
+      rescue Errno::ESRCH
+        # An already-exited child still needs wait() below to release its process entry.
+      end
       Process.wait(pid)
     end
   end
