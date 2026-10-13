@@ -1,15 +1,9 @@
 class PelicanBench < Formula
   desc "Benchmark model endpoints locally with a web UI and CLI"
   homepage "https://github.com/dahuaxiya/pelican-bench"
-  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.3.0/pelican-bench-0.3.0.tgz"
-  sha256 "70ae6e34b23aa7775561bc58882b237a53e08acf58bd4bcc9fe39035f1adadf0"
+  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.4.0/pelican-bench-0.4.0.tgz"
+  sha256 "ca5f2fdc4fa5cd44d351d8cdb43ffb6c7131c03d7078c8115a0db08b157753b1"
   license "MIT"
-
-  bottle do
-    root_url "https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.3.0"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2e606317758c9b37d642f2646597fc290ea5c1be29af209aff4dc6552ad64880"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "4042705a7eb95e1a562104b184db9866889157acd0f059f11997e7ab6d2e155c"
-  end
 
   depends_on "python@3.13"
 
