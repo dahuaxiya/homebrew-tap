@@ -1,15 +1,9 @@
 class PelicanBench < Formula
   desc "Benchmark model endpoints locally with a web UI and CLI"
   homepage "https://github.com/dahuaxiya/pelican-bench"
-  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.4.0/pelican-bench-0.4.0.tgz"
-  sha256 "ca5f2fdc4fa5cd44d351d8cdb43ffb6c7131c03d7078c8115a0db08b157753b1"
+  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.5.0/pelican-bench-0.5.0.tgz"
+  sha256 "e13a2d5f351a70741beb6ab651483f2b34be5333c90f4ffe1cc5030c798d2b2d"
   license "MIT"
-
-  bottle do
-    root_url "https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.4.0"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1bc035f208ad77d881a89eb316817888e69c1a0f33333c837c8e5e68203bb360"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "bae2074e6439535d1b71be7fca19e62eddc28c1cb318537cefeb64d38a842f2f"
-  end
 
   depends_on "python@3.13"
 
@@ -32,6 +26,7 @@ class PelicanBench < Formula
       Background: pelican-bench start -d --no-browser
       Manage: pelican-bench status | stop | restart | logs
       CLI benchmarks: pelican-bench test performance --help
+      VPN node benchmarks: pelican-bench vpn test --help
 
       IQ datasets: pelican-bench setup-iq bbeh  (or arc)
       Engineering: install Docker, then run pelican-bench setup-engineering.
@@ -76,8 +71,14 @@ class PelicanBench < Formula
       end
       assert_match "<html", http.get("/").body
       assert_equal "200", http.get("/static/capacity.js").code
+      assert_equal "200", http.get("/static/network.js").code
+      assert_equal "200", http.get("/static/network.css").code
       assert_match "Already running:", shell_output("#{bin}/pelican-bench --no-browser --data-dir #{data}")
       assert_match "--target", shell_output("#{bin}/pelican-bench test performance --help")
+      # Help and configuration reads must not switch VPN nodes or spend model quota.
+      assert_match "--concurrency", shell_output("#{bin}/pelican-bench vpn test --help")
+      config = JSON.parse(http.get("/api/network/config").body)
+      assert_equal "http://127.0.0.1:9090", config.fetch("controller")
       status = JSON.parse(shell_output("#{bin}/pelican-bench status --json --data-dir #{data}"))
       assert_equal "running", status.fetch("state")
       # Validate the authenticated CLI stop path before the fallback process cleanup below.
