@@ -1,15 +1,9 @@
 class PelicanBench < Formula
   desc "Benchmark model endpoints locally with a web UI and CLI"
   homepage "https://github.com/dahuaxiya/pelican-bench"
-  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.5.0/pelican-bench-0.5.0.tgz"
-  sha256 "e13a2d5f351a70741beb6ab651483f2b34be5333c90f4ffe1cc5030c798d2b2d"
+  url "https://github.com/dahuaxiya/pelican-bench/releases/download/v0.6.0/pelican-bench-0.6.0.tgz"
+  sha256 "a1391bd6bd72a147745f63dbc95bafa01de2fb67bb4f6c649210f20934121434"
   license "MIT"
-
-  bottle do
-    root_url "https://github.com/dahuaxiya/homebrew-tap/releases/download/pelican-bench-0.5.0"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c57390d1fc3c8a27fbc6e90fe7526d8f4ed49dde5fe9f33859d6fc97b518f631"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "58c20e5460e49b76b5e7ca9f3818d79c10d2b8fda04027e2d9b56eecd35fcb57"
-  end
 
   depends_on "python@3.13"
 
@@ -77,6 +71,11 @@ class PelicanBench < Formula
       end
       assert_match "<html", http.get("/").body
       assert_equal "200", http.get("/static/capacity.js").code
+      # New pages must ship with the formula; checking them never starts paid probes.
+      assert_equal "200", http.get("/static/availability.js").code
+      assert_equal "200", http.get("/static/health.js").code
+      assert_equal "200", http.get("/api/availability?hours=24").code
+      assert_equal "200", http.get("/api/health-check/history").code
       assert_equal "200", http.get("/static/network.js").code
       assert_equal "200", http.get("/static/network.css").code
       assert_match "Already running:", shell_output("#{bin}/pelican-bench --no-browser --data-dir #{data}")
